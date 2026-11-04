@@ -27,16 +27,17 @@ product decision that amends this section in the same change. A weakening MUST
 NOT appear as a side effect of implementation, convenience, or a
 backend-specific limitation.
 
-## 0.1 Product definition: a reliable mechanical boundary for durable engineering work state
+## 0.1 Product definition: a reliable mechanical boundary for durable engineering work state and records
 
-Lithify is a **reliable actuator/reconciler for durable engineering work state**.
+Lithify is a **reliable, backend-independent mechanical boundary for durable engineering work state and engineering work records**. It enables autonomous callers to establish explicitly requested work state, publish and retrieve explicitly supplied work records, and verify the relevant backend facts without relying on transient agent context or human interpretation.
 
 Lithify exists to give autonomous systems a **reliable, backend-independent
-mechanical boundary** for two things:
+mechanical boundary** for three things:
 
 ```text
-establishing durable engineering work state
-proving whether a requested durable engineering work state was actually reached
+establishing explicitly requested durable engineering work state
+establishing and retrieving explicitly supplied durable engineering work records
+proving requested state, publication, or retrieval postconditions from actual backend observations
 ```
 
 The governing distinction is:
@@ -104,6 +105,16 @@ continuous, scheduled, or repeated reconciliation loop over previously requested
 state is not established by this section and remains an open product decision
 (Section 3).
 
+Publication and retrieval are also request-scoped mechanical operations:
+
+```text
+explicit record request → exact destination resolution → observation → required publication → fresh observation → verified outcome
+explicit retrieval request → exact scope/identity resolution → backend observation → content and relationship verification → verified result or not-proven outcome
+```
+
+A read-only retrieval does not require mutation. These sequences establish product
+boundaries, not an internal process model, protocol, or receipt schema.
+
 The operation is mechanical in the sense that Lithify's responsibility is
 resolving targets, observing reality, actuating, re-observing, and reporting. It
 is not mechanical in the sense of being trivial; the guarantees in this section
@@ -119,6 +130,14 @@ are the product.
 > Lithify does not decide what work state should exist, and ordinary operation
 > requires no human interpretation. Backend-specific mechanics remain
 > implementation details beneath this product boundary.**
+
+An autonomous caller MUST also be able to supply a work record for publication,
+retrieve an existing record, and obtain backend evidence of the requested result.
+Lithify MUST resolve the exact destination, identity, or work scope and verify
+publication or retrieval postconditions. A publication mutation requires fresh
+post-mutation observation, not merely backend acknowledgement. For retrieval,
+success requires observed content and relevant associations under the declared
+retrieval contract, not a mutation.
 
 The promise decomposes into the following normative requirements:
 
@@ -151,7 +170,17 @@ Decisions outside Lithify include, non-exhaustively:
 - which agent should receive a job;
 - whether one work item semantically depends on another;
 - whether a finding is valid;
-- what workflow should execute next.
+- what workflow should execute next;
+- whether a record should be published and which information is submitted;
+- which records should be selected and which work item or scope they concern;
+- which relationships and authorized backend destination are requested;
+- whether a record supersedes or corrects an earlier record;
+- how a record is interpreted or influences subsequent execution.
+
+Lithify MUST NOT decide whether a reported `DONE`, `STOP`, or `PARTIAL` means a
+work item should change state. Publication MUST be explicitly requested and
+authorized; Lithify MUST NOT automatically capture full agent contexts, private
+conversations, secrets, or unrelated data.
 
 Lithify MAY mechanically establish any of those states when they are explicitly
 requested by an authorized caller. For example:
@@ -175,9 +204,10 @@ Authorization is a precondition on the request, not a semantic judgment Lithify
 performs on the work. What constitutes an authorized caller, and how that
 authority is established, is not fixed by this section (Section 3).
 
-## 0.5 The product domain: durable engineering work state
+## 0.5 The product domain: durable engineering work state and records
 
-The product domain is durable engineering work state. It may include concepts
+The product domain comprises durable engineering work state and explicitly
+supplied engineering work records. It may include concepts
 such as:
 
 - durable work items;
@@ -188,13 +218,29 @@ such as:
 - dependencies / blockers;
 - parent-child work relationships;
 - linkage to execution or change artifacts;
-- other durable state required by engineering-work systems.
+- other durable state required by engineering-work systems;
+- received instructions, task packets, and caller-supplied assignment context;
+- execution reports, including completion, STOP, PARTIAL, blocked, or uncertain reports;
+- explicitly submitted findings, observations, and authorized caller decisions;
+- explicit relationships between instructions, executions, reports, decisions,
+  subsequent work, and work items.
+
+Publishing a record's contents is distinct from linking an arbitrary external
+artifact. Record existence, correct identity, content fidelity, provenance,
+work relationships, availability at observation time, and long-term retention or
+immutability MUST remain distinct claims. Lithify MUST NOT claim more than the
+backend evidence establishes. It verifies the supplied record's publication and
+retrieval, not the truth of its statements, execution correctness, or semantic
+validity of a `DONE` result.
 
 This list MUST NOT be frozen into an implementation-specific universal schema.
-The exact common semantic model MUST be derived from real backend requirements
-rather than imagined prematurely. A concept belongs to Lithify's vocabulary
-because concrete backend evidence requires it, not because one provider happens
-to expose it.
+Necessary product obligations MUST be derived from the accepted Product Intent,
+not from existing backend objects, prototype APIs, or observed work practices.
+Concrete backend evidence informs the evaluation of candidate representations
+and realization choices; it does not establish normative necessity. Product
+choices not entailed by accepted premises require explicit product authority.
+No concept becomes a required Lithify primitive merely because GitHub,
+Proto-Lithify, or an existing workflow exposes or uses it.
 
 ## 0.6 Backend independence: GitHub is the initial backend, not the product
 
@@ -215,7 +261,7 @@ The dependency direction is normative:
 ```text
 Lithify product semantics
         ↓
-backend-independent work-state operation
+backend-independent work-state or work-record operation
         ↓
 backend realization
         ↓
@@ -231,13 +277,18 @@ code structure. A Lithify deployment that currently speaks only to GitHub is
 conformant. A Lithify whose product semantics are defined in terms of GitHub
 objects is not.
 
-This section does not authorize a speculative universal backend abstraction. Only
-GitHub currently provides concrete evidence. The product MUST preserve backend
-independence at the semantic boundary while the first implementation remains
-concretely GitHub-driven. A real common abstraction SHOULD be extracted only when
-additional backend evidence demonstrates what is actually common; an abstraction
-not derived from at least two concrete backend realizations MUST NOT be frozen as
-product semantics.
+This section does not authorize a speculative universal backend abstraction.
+GitHub remains the first selected backend, but its object model MUST NOT supply
+premises for deriving Lithify's necessary product obligations. A realization
+that currently supports only GitHub may conform to the backend-independent
+product boundary.
+
+A shared backend abstraction may be considered as a realization candidate.
+Claims about what is common across backends MUST be supported by evidence from
+at least two concrete backend realizations. This evidence condition governs
+empirical generalization of backend mechanisms; it is not a prerequisite for
+independently deriving product obligations from accepted Product Intent, and
+it does not itself authorize promotion of an abstraction into product semantics.
 
 ## 0.7 Postcondition-driven success: observed state, not accepted requests
 
@@ -290,6 +341,16 @@ How Lithify treats backends whose durable state materializes asynchronously, and
 whether a still-materializing operation is a legitimate product-level outcome,
 is not fixed by this section (Section 3).
 
+Publication and retrieval are subject to these same observed-postcondition
+requirements. Successful publication MUST establish the requested content
+representation, durable record identity, and requested work association.
+Successful retrieval MUST identify the retrieved record and verify its represented
+content and relevant associations against the declared retrieval contract.
+Authorized callers MUST be able to discover records associated with an explicitly
+identified work item or equivalent scope and establish and verify explicitly
+requested relationships between records and work items. Incomplete, ambiguous,
+inaccessible, or unverifiable results MUST be reported rather than hidden.
+
 ## 0.8 Re-observation: the mutation response is not verification evidence
 
 Verification MUST be based on a fresh observation after mutation. The response
@@ -329,9 +390,13 @@ satisfies this requirement for a backend whose only post-write read is not
 distinguishable from the write acknowledgement, is not fixed by this section
 (Section 3).
 
+For publication, the same fresh post-mutation observation is required. Read-only
+retrieval MUST use backend observation to establish its requested postconditions;
+it does not require a write or a post-write observation.
+
 ## 0.9 Exact identity and fail-closed ambiguity
 
-Autonomous unattended mutation requires exact targeting. Lithify MUST NOT rely on
+Autonomous unattended mutation, publication, and retrieval require exact targeting. Lithify MUST NOT rely on
 fuzzy or human interpretation to decide which external object a mutation
 concerns.
 
@@ -352,6 +417,12 @@ rather than guessing. Normatively:
 - unresolved identity MUST be surfaced to the caller as a not-proven outcome
   rather than silently resolved, silently retried until it happens to become
   unique, or escalated to a human during ordinary operation.
+
+For a new record, the containing destination MUST be resolved before publication;
+the created record's final identity MAY be established and verified afterward.
+No pre-creation backend identity is required for a nonexistent record. Retrieval
+MUST resolve the requested identity or explicitly identified work scope without
+heuristically selecting among ambiguous records.
 
 This requirement concerns the identity of the external target, not the semantics
 of the requested work. A boundary that forwards a caller-supplied string into a
@@ -385,6 +456,11 @@ Therefore the Product Intent requires that:
 - concurrent or interleaved operation MUST NOT be permitted to weaken the
   observed-postcondition requirement of Section 0.7 and Section 0.8.
 
+These guarantees also apply to record publication, relationship establishment,
+and retrieval. Successful publication does not establish permanent immutability,
+future availability, or exactly-once effects. Uncertain publication, duplicate
+risk, and concurrent changes MUST NOT be hidden by a success claim.
+
 This section does not fix a concurrency-control, serialization, coalescing, or
 claim model (Section 3).
 
@@ -395,7 +471,7 @@ tools, or administrative interfaces. Those are secondary surfaces.
 
 A conforming runtime MUST NOT require a human to:
 
-- interpret whether a mutation succeeded;
+- interpret whether a mutation, record publication, or retrieval succeeded;
 - choose among ambiguous backend identities;
 - inspect the backend to confirm ordinary success;
 - manually repair normal backend representation differences;
@@ -415,6 +491,12 @@ mechanical.
 
 Lithify is not:
 
+- an agent memory model;
+- an automatic conversation recorder;
+- a semantic report interpreter;
+- a reasoning engine;
+- an independent execution or review verifier;
+- a replacement for the external durable backend;
 - an engineering project manager;
 - an agent scheduler;
 - an agent router;
@@ -426,17 +508,17 @@ Lithify is not:
 - a replacement for Turnlock;
 - a replacement for Ruu.
 
-A higher-level system may use Lithify as its durable work-state boundary:
+A higher-level system may use Lithify as its durable work-state and record boundary:
 
 ```text
 policy / orchestrator / agent
             │
-            │ explicit desired work state
+            │ explicit desired work state or record publication/retrieval request
             ▼
          Lithify
             │
             ▼
- durable work-state backend
+ durable engineering-work backend
 ```
 
 For example, another system may decide:
@@ -445,10 +527,15 @@ For example, another system may decide:
 Issue 42 should become Ready
 Issue 57 should block Issue 42
 Issue 12 should be assigned to agent X
+publish this supplied instruction for the identified work
+publish this supplied execution report and its requested relation to that instruction
+retrieve the available records associated with the identified work
 ```
 
 Lithify's responsibility begins once those desired states have been explicitly
-selected. Normatively:
+selected, or publication or retrieval has been explicitly requested. Lithify MUST
+NOT automatically interpret agent execution reports or infer continuation from
+them. Normatively:
 
 - Lithify MUST NOT choose which work exists, which item is prioritized, whether
   an item is ready, whether an item is complete, which agent receives a job,
@@ -466,15 +553,15 @@ selected. Normatively:
 
 ## 0.13 Relationship to workflow execution and version control
 
-Lithify's state domain is engineering work state. Version-control state is a
-different domain.
+Lithify's domain is engineering work state and records. Version-control state is
+a different domain.
 
 A system such as Ruu may own Git convergence, while a system such as Turnlock may
 own workflow execution and orchestration. A larger autonomous engineering system
 may compose them:
 
 ```text
-durable work state ── Lithify
+durable work state and records ── Lithify
 workflow execution ── Turnlock
 Git convergence    ── Ruu
 ```
@@ -490,6 +577,14 @@ artifact or a change artifact. Establishing and verifying that linkage is durabl
 engineering work state and is inside Lithify's domain. Establishing or verifying
 the artifact's own internal state, its version-control convergence, or its
 workflow progression is not.
+
+Lithify MAY establish or retrieve caller-supplied reports and their explicit
+relationships, including references to execution artifacts, without assuming
+responsibility for execution correctness. External systems execute workflows,
+produce reports, review results, and converge version-control state. Verifying a
+record's represented content under its retrieval contract is not independently
+verifying the referenced execution or artifact's internal correctness. No such
+system, including Review Broker, becomes a normative dependency of Lithify.
 
 ## 0.14 Product-intent conformance rule
 
@@ -511,6 +606,13 @@ an unobservable postcondition to be reported as a mechanical success
 caller-owned policy (existence, priority, readiness, assignment, dependency, workflow choice) to be decided by Lithify
 a backend-specific identifier, API shape, or provider object model to define Lithify's product semantics
 a required semantic judgment to be silently converted into a mechanical-looking result
+a record to be reported as published solely because a write request was accepted
+content to be claimed durably preserved when only an unverified external pointer was stored
+the originating agent's transient context to be required for ordinary retrieval
+records to be silently selected by heuristic while identity or scope remains ambiguous
+semantic validity or task completion to be inferred from a published report
+indefinite retention or immutability to be claimed without an established guarantee
+unauthorized automatic capture or publication
 ```
 
 Fail-closed behavior remains required for unavailable, ambiguous, or
@@ -574,11 +676,31 @@ The conforming outcome is a not-proven result that names the ambiguity.
 The caller — not a human operator — decides what to do about it.
 ```
 
+A second product-conformance scenario establishes cross-agent continuity:
+
+```text
+1. An authorized caller explicitly submits an instruction for publication.
+2. Lithify resolves its destination, establishes its durable record identity,
+   and verifies publication through fresh backend observation.
+3. An execution report is explicitly submitted for publication, with a requested
+   relationship to the instruction and identified engineering work.
+4. Lithify establishes and verifies the report and requested relationships.
+5. The originating agent terminates or loses its transient context.
+6. A different authorized agent identifies the engineering work and discovers
+   and retrieves the available instruction and report through that work.
+7. Backend observations establish returned content, record identities, and
+   relationships without the originating agent's transient context.
+8. The receiving agent or orchestrator decides the next action outside Lithify.
+```
+
+If the backend accepts publication but Lithify cannot verify the record's content
+or required association, the conforming outcome is not-proven, not success.
+
 For any candidate architecture, it must be possible to answer, per operation:
 
 ```text
 which exact external target was resolved, and from which observation
-what durable state was observed before actuation
+what durable state or record evidence was observed before any required actuation
 what mechanical mutation, if any, was required
 what fresh observation established, or failed to establish, the postcondition
 what machine-readable outcome was reported, and what remains uncertain
@@ -587,6 +709,30 @@ what machine-readable outcome was reported, and what remains uncertain
 An architecture that cannot answer these questions for its ordinary operations has
 drifted away from Lithify's product intent, regardless of how reliable its
 plumbing is.
+
+## 0.16 Durable agent work records and cross-execution continuity
+
+Lithify MUST provide authorized autonomous callers with mechanical capabilities to establish, retrieve, and verify durable engineering work records associated with explicitly identified engineering work.
+
+A work record represents caller-supplied engineering-work information intended to remain accessible outside the originating execution context. Such information MAY include an instruction or work packet received by an agent, an execution report produced by an agent, an observation, a finding, a decision, or a relationship to another work record or work item. These examples do not prescribe a universal record schema.
+
+The product-defining outcome is that an agent, or another authorized agent executing later, can recover the established work records through durable backend identities and work associations without relying on the originating agent's transient memory, conversation state, process lifetime, or local execution context.
+
+Lithify MUST NOT decide which information deserves publication, what its contents mean, what action follows from it, or whether a report's substantive claims are correct. Those decisions and judgments belong to the caller or another higher-level system.
+
+For an explicitly requested record publication, Lithify MUST resolve the authorized destination, attempt only the required mechanical operation, and report verified success only when a fresh backend observation establishes the requested record identity, content representation, and required associations. A backend write acknowledgement is insufficient.
+
+For an explicitly requested record retrieval, Lithify MUST resolve the requested identity or work scope, obtain backend evidence, and distinguish verified retrieval from absence, ambiguity, incompleteness, or inability to establish the requested content and associations.
+
+Where a record's content is represented through an external reference, verification of that reference alone MUST NOT be reported as verification of the referenced content's durability or availability.
+
+Where the backend cannot establish unique publication, content fidelity, retrieval, or requested relationships, Lithify MUST expose the relevant uncertainty rather than manufacture a successful result. Retry and concurrency behavior MUST preserve the existing fail-closed guarantees.
+
+Lithify MUST NOT claim that publication success establishes indefinite retention, immutable historical preservation, global atomicity, exclusive causality, or future availability unless the relevant guarantee is separately established.
+
+The external backend owns the stored records. Lithify owns the mechanical boundary through which their requested publication, retrieval, and relationships are established and verified.
+
+The specific record vocabulary, interface, schema, indexing strategy, retention policy, revision model, and backend realization remain architectural or product decisions to be derived separately. This subsection establishes required product capabilities, not their implementation.
 
 # 1. Specification discipline
 
@@ -618,6 +764,64 @@ Consequences of these rules:
   because an implementation happens to answer it. An implementation choice is
   evidence for a decision, never a decision.
 
+## 1.1 Recorded methodological decision — 2026-11-04
+
+The product owner explicitly separates Lithify's independent product derivation
+from Proto-Lithify's empirical investigation. Proto-Lithify is not a mandatory
+architectural predecessor, a normative reference implementation, or a template
+that Lithify must generalize.
+
+This decision also clarifies Sections 0.5 and 0.6: backend evidence supports
+realization evaluation and justified claims of cross-backend commonality; it
+is not the source of Lithify's necessary product obligations. This is an
+explicitly recorded owner decision, not a claim that empirical practice has
+proved a new necessary product requirement.
+
+## 1.2 Independent derivation and explicit choices
+
+For each proposed obligation, identify its accepted premises and distinguish:
+
+- a necessary consequence of accepted Product Intent;
+- an explicitly accepted product choice that is not logically entailed;
+- a candidate architectural or realization choice;
+- an empirical observation or a remaining uncertainty.
+
+Do not treat an existing implementation, backend API, GitHub object, command,
+agent workflow, or work-record taxonomy as a normative premise merely because
+it exists or appears useful. Compatibility with Product Intent does not prove
+necessity. An unproven consequence remains unproven; unresolved choices must
+not be filled by an implementation preference.
+
+This discipline does not claim that Product Intent uniquely determines every
+architecture. Where multiple realizations remain compatible with established
+obligations, preserve that freedom and identify the separate decision needed
+before selecting one.
+
+## 1.3 Empirical challenge and later confrontation
+
+Proto-Lithify's empirical work may proceed independently and in parallel.
+Observations may expose limitations, counterexamples, or questions requiring
+examination. They do not silently amend Product Intent or retroactively become
+the premises of an earlier derivation.
+
+Before using Proto-Lithify to select a Lithify realization, establish and accept
+an independently derived obligation baseline for the exact scope being
+confronted. Identify its revision, premises, unresolved decisions, exclusions,
+and justification. This does not require all future Lithify derivation to be
+complete before any bounded comparison can occur.
+
+Confront that baseline with separately identified empirical evidence. Record
+which obligations are supported, unsupported, contradicted, or unexamined by
+the evidence; distinguish missing evidence from a demonstrated incompatibility.
+Keep GitHub-specific constraints explicit and assess alternatives rather than
+presupposing prototype reuse.
+
+A confrontation may recommend reuse, adaptation, replacement, rejection, or
+continued investigation. No outcome is predetermined. Adoption requires its
+own justified decision under the accepted product boundary. Any necessary
+change to Product Intent requires an explicit owner decision and synchronized
+normative text, not a retrospective reinterpretation of experimental results.
+
 # 2. Origins and implementation evidence (non-normative)
 
 This section is context. It creates no requirement, promise, or invariant, and it
@@ -640,24 +844,33 @@ written.
 - The narrower problem is reliable unattended actuation of durable work state,
   and proof that the requested state was actually reached.
 
-## 2.2 Current implementation context
+## 2.2 Proto-Lithify as empirical evidence
 
-The repository `fanilosendrison/proto-lithify` is useful evidence
-for the initial GitHub realization. It already demonstrates some of the
-mechanical ideas this specification requires:
+The separate repository `fanilosendrison/proto-lithify` contains a concrete
+GitHub adapter and is an empirical investigation ground for engineering work
+state and work-record practices. Its existing implementation provides evidence
+about explicit operations, live identity resolution, postcondition observation,
+and machine-readable receipts within its declared contracts and tested scope.
 
-- explicit operations;
-- live backend identity resolution;
-- fail-closed ambiguity handling;
-- mutation followed by a fresh read;
-- postcondition verification;
-- machine-readable receipts.
+Existing capabilities, proposed experiments, observations, qualification
+results, and remaining limitations must be distinguished. A research role does
+not establish that work-record publication or retrieval has been implemented,
+and passing implementation tests does not establish complete live-provider or
+Lithify product conformance.
 
-That repository is not migrated, copied, or refactored as part of this
-specification work, and it is not an architectural template for Lithify. Not
-every current implementation choice in it is part of Lithify's Product Intent.
-It is evidence that the mechanics described in Section 0 are realizable against
-GitHub; Section 0 alone decides what Lithify is.
+Proto-Lithify's command vocabulary, GitHub object mappings, repository layout,
+and observed agent workflows do not define Lithify's required concepts or
+architecture. Its evidence is an input to the bounded confrontation described
+in Section 1.3, not a normative source for independent derivation.
+
+The prototype's empirical charter is maintained in its own repository at
+`docs/research/empirical-role-and-evidence.md`. That charter governs how its
+research is described and delimited; it has no authority to amend Lithify.
+Lithify owns the assessment and any adoption decision concerning Lithify.
+
+No migration, code reuse, generalized CLI, backend architecture, or common
+work-record schema is selected by this relationship. Section 0 remains the
+product authority; Section 3 retains the explicitly unresolved decisions.
 
 # 3. Current boundaries — intentionally not specified
 
@@ -693,5 +906,14 @@ decision resolves them; an implementation MUST NOT silently settle them.
   the product or only an implementation convenience.
 - Whether the first GitHub realization's operation set is the initial product
   surface or only evidence for it.
+- The concrete work-record semantic model.
+- Whether record content is embedded, referenced, or both.
+- Record identity, content representation, and integrity evidence.
+- Discovery and association mechanisms for work-scoped records.
+- Revision, correction, supersession, and historical-preservation semantics.
+- Retention, deletion, access control, and confidentiality guarantees.
+- Publication idempotence, concurrent publication, and recovery after uncertain outcomes.
+- Backend support limitations for work records.
+- The specific publication and retrieval API, receipt contracts, and indexing architecture.
 
 These are future derivation points. Their solutions must preserve Section 0.
