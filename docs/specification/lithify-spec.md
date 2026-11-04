@@ -693,6 +693,44 @@ A second product-conformance scenario establishes cross-agent continuity:
 8. The receiving agent or orchestrator decides the next action outside Lithify.
 ```
 
+A third product-conformance scenario establishes artifact-first recovery without claiming complete historical provenance:
+
+```text
+1. Agent A prepares an instruction for identified engineering work and may
+   provide contextual source materials.
+
+2. An authorized caller explicitly requests publication of the supplied
+   records and their work associations. Lithify establishes and verifies
+   the requested publication and relationships.
+
+3. Agent B receives the instruction, performs engineering work outside
+   Lithify, and produces an engineering change artifact.
+
+4. An authorized caller explicitly submits an execution report for
+   publication and requests an association between the exact identity
+   of the change artifact and the identified engineering work.
+
+5. Lithify establishes and verifies the requested record publication
+   and artifact-to-work association through backend observations.
+
+6. Agent C later knows the artifact's exact scoped identity, but does
+   not know the original work identity or the transient contexts of
+   Agent A and Agent B.
+
+7. Agent C explicitly requests recovery through that artifact identity.
+   Lithify discovers the observed work association, retrieves available
+   published work records, and verifies the requested record identities,
+   represented contents, and relationships.
+
+8. Any missing, inaccessible, ambiguous, or unverifiable record or
+   association is reported as such. Lithify does not fabricate absent
+   information or claim that the recovered records constitute a complete
+   account of the work.
+
+9. Agent C or its orchestrator interprets the recovered information and
+   determines the next action outside Lithify.
+```
+
 If the backend accepts publication but Lithify cannot verify the record's content
 or required association, the conforming outcome is not-proven, not success.
 
@@ -723,6 +761,12 @@ Lithify MUST NOT decide which information deserves publication, what its content
 For an explicitly requested record publication, Lithify MUST resolve the authorized destination, attempt only the required mechanical operation, and report verified success only when a fresh backend observation establishes the requested record identity, content representation, and required associations. A backend write acknowledgement is insufficient.
 
 For an explicitly requested record retrieval, Lithify MUST resolve the requested identity or work scope, obtain backend evidence, and distinguish verified retrieval from absence, ambiguity, incompleteness, or inability to establish the requested content and associations.
+
+Where an authorized caller explicitly requests that an engineering change artifact be associated with identified engineering work, Lithify MUST be able to establish and verify that association without assuming responsibility for the artifact's internal state or correctness. A later authorized caller supplying the artifact's exact identity and required scope MUST be able to discover the associated engineering work and retrieve its available published work records through that verified association, without knowing the work identity or originating agent context in advance.
+
+Successful artifact-first discovery and retrieval MUST be supported by backend observations establishing the exact identity used for lookup, the requested work association, and the identities, represented contents, and relevant relationships of records actually recovered. Ambiguous artifact identity, missing or inaccessible associations, unavailable records, or insufficient verification evidence MUST be exposed rather than silently resolved or represented as successful recovery. Lithify MUST NOT infer missing instructions, external source materials, execution reports, decisions, or causal explanations from the observed change artifact.
+
+Recovering available published records MUST NOT be represented as recovering a complete history of the work. Lithify MUST NOT claim that every relevant instruction, source, agent action, report, or decision was captured, published, retained, or recovered merely because some records were successfully retrieved. Any stronger claim of completeness, historical preservation, or future availability requires separately established and applicable guarantees. Publication and retrieval remain explicitly requested operations; this obligation does not authorize automatic agent-context capture.
 
 Where a record's content is represented through an external reference, verification of that reference alone MUST NOT be reported as verification of the referenced content's durability or availability.
 
