@@ -234,10 +234,13 @@ retrieval, not the truth of its statements, execution correctness, or semantic
 validity of a `DONE` result.
 
 This list MUST NOT be frozen into an implementation-specific universal schema.
-The exact common semantic model MUST be derived from real backend requirements
-rather than imagined prematurely. A concept belongs to Lithify's vocabulary
-because concrete backend evidence requires it, not because one provider happens
-to expose it.
+Necessary product obligations MUST be derived from the accepted Product Intent,
+not from existing backend objects, prototype APIs, or observed work practices.
+Concrete backend evidence informs the evaluation of candidate representations
+and realization choices; it does not establish normative necessity. Product
+choices not entailed by accepted premises require explicit product authority.
+No concept becomes a required Lithify primitive merely because GitHub,
+Proto-Lithify, or an existing workflow exposes or uses it.
 
 ## 0.6 Backend independence: GitHub is the initial backend, not the product
 
@@ -274,13 +277,18 @@ code structure. A Lithify deployment that currently speaks only to GitHub is
 conformant. A Lithify whose product semantics are defined in terms of GitHub
 objects is not.
 
-This section does not authorize a speculative universal backend abstraction. Only
-GitHub currently provides concrete evidence. The product MUST preserve backend
-independence at the semantic boundary while the first implementation remains
-concretely GitHub-driven. A real common abstraction SHOULD be extracted only when
-additional backend evidence demonstrates what is actually common; an abstraction
-not derived from at least two concrete backend realizations MUST NOT be frozen as
-product semantics.
+This section does not authorize a speculative universal backend abstraction.
+GitHub remains the first selected backend, but its object model MUST NOT supply
+premises for deriving Lithify's necessary product obligations. A realization
+that currently supports only GitHub may conform to the backend-independent
+product boundary.
+
+A shared backend abstraction may be considered as a realization candidate.
+Claims about what is common across backends MUST be supported by evidence from
+at least two concrete backend realizations. This evidence condition governs
+empirical generalization of backend mechanisms; it is not a prerequisite for
+independently deriving product obligations from accepted Product Intent, and
+it does not itself authorize promotion of an abstraction into product semantics.
 
 ## 0.7 Postcondition-driven success: observed state, not accepted requests
 
@@ -756,6 +764,64 @@ Consequences of these rules:
   because an implementation happens to answer it. An implementation choice is
   evidence for a decision, never a decision.
 
+## 1.1 Recorded methodological decision — 2026-11-04
+
+The product owner explicitly separates Lithify's independent product derivation
+from Proto-Lithify's empirical investigation. Proto-Lithify is not a mandatory
+architectural predecessor, a normative reference implementation, or a template
+that Lithify must generalize.
+
+This decision also clarifies Sections 0.5 and 0.6: backend evidence supports
+realization evaluation and justified claims of cross-backend commonality; it
+is not the source of Lithify's necessary product obligations. This is an
+explicitly recorded owner decision, not a claim that empirical practice has
+proved a new necessary product requirement.
+
+## 1.2 Independent derivation and explicit choices
+
+For each proposed obligation, identify its accepted premises and distinguish:
+
+- a necessary consequence of accepted Product Intent;
+- an explicitly accepted product choice that is not logically entailed;
+- a candidate architectural or realization choice;
+- an empirical observation or a remaining uncertainty.
+
+Do not treat an existing implementation, backend API, GitHub object, command,
+agent workflow, or work-record taxonomy as a normative premise merely because
+it exists or appears useful. Compatibility with Product Intent does not prove
+necessity. An unproven consequence remains unproven; unresolved choices must
+not be filled by an implementation preference.
+
+This discipline does not claim that Product Intent uniquely determines every
+architecture. Where multiple realizations remain compatible with established
+obligations, preserve that freedom and identify the separate decision needed
+before selecting one.
+
+## 1.3 Empirical challenge and later confrontation
+
+Proto-Lithify's empirical work may proceed independently and in parallel.
+Observations may expose limitations, counterexamples, or questions requiring
+examination. They do not silently amend Product Intent or retroactively become
+the premises of an earlier derivation.
+
+Before using Proto-Lithify to select a Lithify realization, establish and accept
+an independently derived obligation baseline for the exact scope being
+confronted. Identify its revision, premises, unresolved decisions, exclusions,
+and justification. This does not require all future Lithify derivation to be
+complete before any bounded comparison can occur.
+
+Confront that baseline with separately identified empirical evidence. Record
+which obligations are supported, unsupported, contradicted, or unexamined by
+the evidence; distinguish missing evidence from a demonstrated incompatibility.
+Keep GitHub-specific constraints explicit and assess alternatives rather than
+presupposing prototype reuse.
+
+A confrontation may recommend reuse, adaptation, replacement, rejection, or
+continued investigation. No outcome is predetermined. Adoption requires its
+own justified decision under the accepted product boundary. Any necessary
+change to Product Intent requires an explicit owner decision and synchronized
+normative text, not a retrospective reinterpretation of experimental results.
+
 # 2. Origins and implementation evidence (non-normative)
 
 This section is context. It creates no requirement, promise, or invariant, and it
@@ -778,24 +844,33 @@ written.
 - The narrower problem is reliable unattended actuation of durable work state,
   and proof that the requested state was actually reached.
 
-## 2.2 Current implementation context
+## 2.2 Proto-Lithify as empirical evidence
 
-The repository `fanilosendrison/proto-lithify` is useful evidence
-for the initial GitHub realization. It already demonstrates some of the
-mechanical ideas this specification requires:
+The separate repository `fanilosendrison/proto-lithify` contains a concrete
+GitHub adapter and is an empirical investigation ground for engineering work
+state and work-record practices. Its existing implementation provides evidence
+about explicit operations, live identity resolution, postcondition observation,
+and machine-readable receipts within its declared contracts and tested scope.
 
-- explicit operations;
-- live backend identity resolution;
-- fail-closed ambiguity handling;
-- mutation followed by a fresh read;
-- postcondition verification;
-- machine-readable receipts.
+Existing capabilities, proposed experiments, observations, qualification
+results, and remaining limitations must be distinguished. A research role does
+not establish that work-record publication or retrieval has been implemented,
+and passing implementation tests does not establish complete live-provider or
+Lithify product conformance.
 
-That repository is not migrated, copied, or refactored as part of this
-specification work, and it is not an architectural template for Lithify. Not
-every current implementation choice in it is part of Lithify's Product Intent.
-It is evidence that the mechanics described in Section 0 are realizable against
-GitHub; Section 0 alone decides what Lithify is.
+Proto-Lithify's command vocabulary, GitHub object mappings, repository layout,
+and observed agent workflows do not define Lithify's required concepts or
+architecture. Its evidence is an input to the bounded confrontation described
+in Section 1.3, not a normative source for independent derivation.
+
+The prototype's empirical charter is maintained in its own repository at
+`docs/research/empirical-role-and-evidence.md`. That charter governs how its
+research is described and delimited; it has no authority to amend Lithify.
+Lithify owns the assessment and any adoption decision concerning Lithify.
+
+No migration, code reuse, generalized CLI, backend architecture, or common
+work-record schema is selected by this relationship. Section 0 remains the
+product authority; Section 3 retains the explicitly unresolved decisions.
 
 # 3. Current boundaries — intentionally not specified
 

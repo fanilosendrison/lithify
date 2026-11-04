@@ -20,3 +20,13 @@ The normative product authority is
 [the Lithify specification](docs/specification/lithify-spec.md). Its Section 0
 states the product intent that every later requirement, architectural
 implication, and implementation must preserve.
+
+## Development method and Proto-Lithify
+
+Lithify's necessary product obligations are derived independently from its
+accepted Product Intent. Proto-Lithify is a separate empirical GitHub prototype,
+not a required architecture or a normative reference implementation.
+
+The [specification discipline](docs/specification/lithify-spec.md#1-specification-discipline)
+defines independent derivation, explicit product choices, and the later bounded
+confrontation of established obligations with empirical evidence.
